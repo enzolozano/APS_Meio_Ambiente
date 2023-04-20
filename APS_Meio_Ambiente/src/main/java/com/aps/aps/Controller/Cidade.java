@@ -5,14 +5,15 @@ import com.aps.aps.Helpers.FuncBasicas;
 import com.aps.aps.Model.MedidaModel;
 import com.aps.aps.Model.RespostaModel;
 import com.aps.aps.ResponseModel.CitiesResponse;
-import com.aps.aps.ResponseModel.MeasurementsResponse;
+import com.aps.aps.ResponseModel.LatestMeasurementResponse;
 
+import com.aps.aps.ResponseModel.MeasurementsList;
+import com.aps.aps.ResponseModel.MeasurementsResult;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.google.gson.Gson;
 
-import kotlin.collections.ArrayDeque;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -29,35 +31,36 @@ public class Cidade {
 
     private final FuncBasicas _funcao = new FuncBasicas();
 
-    @RequestMapping(value = "/Medidas", method = RequestMethod.GET)
-    public ResponseEntity<?> Medidas(String city) {
+    @RequestMapping(value = "/MedidaMaisRecente", method = RequestMethod.GET)
+    public ResponseEntity<?> MedidaMaisRecente(String city) {
 
-        String URI = "/v2/measurements?country_id=BR&city="+ city +"&order_by=datetime&sort=desc";
+        String URL = "/v2/latest?sort=desc&country_id=BR&city=" + city +"&order_by=lastUpdated&dumpRaw=false";
 
-        String resposta = new GerenciaAPI().GET(URI);
+        String resposta = new GerenciaAPI().GET(URL);
 
         if (resposta.length() == 0) {
 
             return new ResponseEntity<>(_funcao.MontaModeloResposta("FALHA", "Não foi possível receber resposta da requisição", null), HttpStatus.NOT_FOUND);
         }
 
-        MeasurementsResponse mr = new MeasurementsResponse();
+        LatestMeasurementResponse lmr = new LatestMeasurementResponse();
         ObjectMapper mapper = new ObjectMapper();
 
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         try {
 
-            mr = new Gson().fromJson(resposta, MeasurementsResponse.class);
+            lmr = new Gson().fromJson(resposta, LatestMeasurementResponse.class);
 
-            if (mr.getResults().isEmpty()) {
+            if (lmr.getResults().isEmpty()) {
 
                 return new ResponseEntity<>(_funcao.MontaModeloResposta("FALHA", "Nenhum registro encontrado", null), HttpStatus.NO_CONTENT);
             }
 
             MedidaModel medidaModel = new MedidaModel();
 
-            medidaModel.setCidade(mr.getResults().get(0).getCity());
+            medidaModel.setCidade(lmr.getResults().get(0).getCity());
+            medidaModel.setMedidas(lmr.getResults().get(0).getMeasurements());
 
             return new ResponseEntity<RespostaModel>(_funcao.MontaModeloResposta("OK", "", medidaModel), HttpStatus.OK);
         }
