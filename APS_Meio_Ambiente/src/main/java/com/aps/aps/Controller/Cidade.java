@@ -2,13 +2,13 @@ package com.aps.aps.Controller;
 
 import com.aps.aps.ControllerRequest.GerenciaAPI;
 import com.aps.aps.Helpers.FuncBasicas;
+import com.aps.aps.Model.MaiorSubstanciaModel;
 import com.aps.aps.Model.MedidaModel;
 import com.aps.aps.Model.RespostaModel;
 import com.aps.aps.ResponseModel.CitiesResponse;
 import com.aps.aps.ResponseModel.LatestMeasurementResponse;
 
 import com.aps.aps.ResponseModel.MeasurementsList;
-import com.aps.aps.ResponseModel.MeasurementsResult;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -22,8 +22,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/Cidade")
@@ -68,6 +69,51 @@ public class Cidade {
 
             return new ResponseEntity<RespostaModel>(_funcao.MontaModeloResposta("FALHA", ex.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @RequestMapping(value = "/MaiorSubstancia", method = RequestMethod.GET)
+    public ResponseEntity<?> MaiorSubstancia(String city) {
+
+        String URL = "/v2/latest?sort=desc&country_id=BR&city=" + city +"&order_by=lastUpdated&dumpRaw=false";
+
+        String resposta = new GerenciaAPI().GET(URL);
+
+        if (resposta.length() == 0) {
+
+            return new ResponseEntity<>(_funcao.MontaModeloResposta("FALHA", "Não foi possível receber resposta da requisição", null), HttpStatus.NOT_FOUND);
+        }
+
+        LatestMeasurementResponse lmr = new LatestMeasurementResponse();
+        ObjectMapper mapper = new ObjectMapper();
+
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+        try {
+
+            lmr = new Gson().fromJson(resposta, LatestMeasurementResponse.class);
+
+            if (lmr.getResults().isEmpty()) {
+
+                return new ResponseEntity<>(_funcao.MontaModeloResposta("FALHA", "Nenhum registro encontrado", null), HttpStatus.NO_CONTENT);
+            }
+
+            MaiorSubstanciaModel maiorSubstanciaModel = new MaiorSubstanciaModel();
+
+            maiorSubstanciaModel.setCidade(lmr.getResults().get(0).getCity());
+            maiorSubstanciaModel.setMedida(ordenar(lmr.getResults().get(0).getMeasurements()).get(0));
+
+            return new ResponseEntity<RespostaModel>(_funcao.MontaModeloResposta("OK", "", maiorSubstanciaModel), HttpStatus.OK);
+        }
+        catch (Exception ex) {
+
+            return new ResponseEntity<RespostaModel>(_funcao.MontaModeloResposta("FALHA", ex.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public List<MeasurementsList> ordenar (List<MeasurementsList> lista) {
+        return lista.stream()
+                .sorted(Comparator.comparingDouble(MeasurementsList::getValue).reversed())
+                .collect(Collectors.toList());
     }
 
     @RequestMapping(value = "/Lista", method = RequestMethod.GET)
