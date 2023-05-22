@@ -1,7 +1,5 @@
 package com.aps.aps.ResponseModel;
 
-import javax.xml.crypto.Data;
-
 public class MeasurementResult {
     public long locationId;
     public String location;
