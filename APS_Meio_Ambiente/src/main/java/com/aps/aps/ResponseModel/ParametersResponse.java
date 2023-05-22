@@ -6,5 +6,7 @@ public class ParametersResponse {
     public MetaResponse meta;
     public List<ParametersResult> results;
 
-
+    public List<ParametersResult> getResults() {
+        return results;
+    }
 }
