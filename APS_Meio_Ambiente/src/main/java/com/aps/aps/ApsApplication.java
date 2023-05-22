@@ -1,11 +1,11 @@
-package com.project.APS;
-
-import jakarta.annotation.PostConstruct;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+package com.aps.aps;
 
 import java.util.TimeZone;
 
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ApsApplication {
 
@@ -15,7 +15,7 @@ public class ApsApplication {
 
 	@PostConstruct
 	public void init() {
-		TimeZone.setDefault(TimeZone.getTimeZone(("America/Sao_Paulo")));
+		TimeZone.setDefault((TimeZone.getTimeZone("America/Sao_Paulo")));
 	}
 
 }

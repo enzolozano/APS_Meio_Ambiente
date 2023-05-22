@@ -1,4 +1,4 @@
-package com.project.APS;
+package com.aps.aps;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
