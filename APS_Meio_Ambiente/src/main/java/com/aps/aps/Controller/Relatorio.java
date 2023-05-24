@@ -4,6 +4,8 @@ import com.aps.aps.Helpers.FuncBasicas;
 import com.aps.aps.Model.MedidaModel;
 import com.aps.aps.ResponseModel.MeasurementsList;
 
+import java.nio.file.*;
+
 import org.jfree.data.general.DefaultPieDataset;
 
 import org.springframework.http.HttpStatus;
@@ -27,7 +29,8 @@ public class Relatorio {
             GeraGrafico grafico = new GeraGrafico();
             DefaultPieDataset dados = new DefaultPieDataset();
             Cidade cidade = new Cidade();
-            String caminhoArquivo = "D:/PASTAS SIMILARES WINDOWS/Documentos/RelatorioQualidadeDoAr";
+            
+            String caminhoArquivo = Files.readString(Paths.get("./caminhoArquivo.txt"));
 
             MedidaModel medidaModel = (MedidaModel)cidade.Medidas(city).getBody().Resposta;
 
@@ -47,7 +50,7 @@ public class Relatorio {
 
             }
 
-            GeraPDF relatorioPdfSimples = new GeraPDF();
+            GeraPDF relatorioPdfSimples = new GeraPDF(caminhoArquivo);
             relatorioPdfSimples.gerarCabecalho();
             relatorioPdfSimples.gerarCorpo(medidaModel.Medidas);
             relatorioPdfSimples.gerarRodape();

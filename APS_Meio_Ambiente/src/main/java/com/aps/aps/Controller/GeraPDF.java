@@ -28,11 +28,14 @@ import java.util.List;
 public class GeraPDF implements Relatorio {
 
     private Document documentoPDF;
-    private String caminhoRelatorio = "D:/PASTAS SIMILARES WINDOWS/Documentos/RelatorioQualidadeDoAr.pdf";
-    private String caminhoImagem = "D:/PASTAS SIMILARES WINDOWS/Documentos/RelatorioQualidadeDoAr.jpeg";
+    private String caminhoRelatorio = "";
+    private String caminhoImagem = "";
 
-    public GeraPDF() {
+    public GeraPDF(String caminhoArquivo) {
 
+        this.caminhoRelatorio = caminhoArquivo + ".pdf";
+        this.caminhoImagem = caminhoArquivo + ".jpeg";
+        
         this.documentoPDF = new Document(PageSize.A4, 50, 50, 50, 50);
 
         try {
